@@ -690,17 +690,59 @@ elif page == "🔍 Explainability":
             else:
                 sv_inst = shap_obj[0]
 
-            import shap
-            fig, ax = plt.subplots(figsize=(8, 4.8), facecolor='#111827')
-            fig.patch.set_facecolor('#111827')
-            shap.plots.waterfall(sv_inst, max_display=7, show=False)
-            plt.title("TreeSHAP Local Waterfall Attribution", color='#f8fafc', fontsize=12, pad=12)
-            plt.tick_params(colors='#94a3b8', labelsize=9)
-            plt.tight_layout()
-            st.pyplot(fig)
-            plt.close()
+            wf_tab1, wf_tab2 = st.tabs(["🌊 TreeSHAP Waterfall (Standard View)", "📊 Control-Room Attribution Bars (Dark View)"])
 
-            st.caption("🔴 Red bars push the prediction toward failure. 🔵 Blue bars pull the prediction toward normal operation.")
+            with wf_tab1:
+                # High-contrast white canvas for standard TreeSHAP waterfall
+                import shap
+                fig, ax = plt.subplots(figsize=(8.5, 5.0), facecolor='#ffffff')
+                ax.set_facecolor('#ffffff')
+                fig.patch.set_facecolor('#ffffff')
+                shap.plots.waterfall(sv_inst, max_display=7, show=False)
+                plt.title("TreeSHAP Local Waterfall Attribution", color='#0f172a', fontsize=12, pad=12, fontweight='bold')
+                plt.tight_layout()
+
+                st.markdown("<div style='background: #ffffff; border-radius: 8px; padding: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.25);'>", unsafe_allow_html=True)
+                st.pyplot(fig)
+                st.markdown("</div>", unsafe_allow_html=True)
+                plt.close()
+
+                st.caption("🔴 Red bars push prediction toward failure. 🔵 Blue bars pull prediction toward normal operation.")
+
+            with wf_tab2:
+                # Custom industrial dark theme attribution bar plot
+                features = target_df.columns
+                values = sv_inst.values
+                sort_idx = np.argsort(np.abs(values))
+
+                sorted_features = [features[i] for i in sort_idx]
+                sorted_values = values[sort_idx]
+                bar_colors = ['#ef4444' if v > 0 else '#0ea5e9' for v in sorted_values]
+
+                fig_dark, ax_dark = plt.subplots(figsize=(8.5, 4.8), facecolor='#111827')
+                ax_dark.set_facecolor('#111827')
+                bars = ax_dark.barh(sorted_features, sorted_values, color=bar_colors, height=0.6, edgecolor='#1e293b')
+                ax_dark.axvline(0, color='#64748b', linestyle='--', linewidth=1)
+                ax_dark.set_xlabel('SHAP Value (Log-Odds Impact)', color='#94a3b8', fontsize=10)
+                ax_dark.set_title('Feature Contribution to Current Prediction', color='#f8fafc', fontsize=12, pad=12, fontweight='bold')
+                ax_dark.tick_params(colors='#f8fafc', labelsize=9)
+                for spine in ax_dark.spines.values():
+                    spine.set_color('#1e293b')
+                ax_dark.grid(axis='x', linestyle=':', color='#334155', alpha=0.5)
+
+                # Add value labels
+                for bar, val in zip(bars, sorted_values):
+                    x_pos = val + (0.1 if val >= 0 else -0.1)
+                    ha = 'left' if val >= 0 else 'right'
+                    ax_dark.text(x_pos, bar.get_y() + bar.get_height()/2, f'{val:+.2f}', 
+                                va='center', ha=ha, color='#f8fafc', fontsize=9, fontweight='bold')
+
+                plt.tight_layout()
+                st.pyplot(fig_dark)
+                plt.close()
+
+                st.caption("🔴 Red bars increase failure probability. 🔵 Blue bars stabilize toward normal operation.")
+
         else:
             # Fallback to pre-generated waterfall image if exists
             waterfall_file = os.path.join(BASE_DIR, 'artifacts', 'figures', 'shap_waterfall.png')
