@@ -1,0 +1,170 @@
+\documentclass[journal,10pt,twocolumn]{IEEEtran}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{microtype}
+
+\begin{document}
+
+\title{X-Maintain: An Explainable Machine Learning Framework for Predictive Maintenance and Machine Failure Prediction}
+
+\author{Syagamreddy~Gopi~Adithya~Vardhan~Reddy%
+\thanks{S. G. A. V. Reddy is with the Department of Computer Science and Engineering, Vellore Institute of Technology, Vellore, Tamil Nadu 632014, India (e-mail: gopi.adithya2022@vitstudent.ac.in).}}
+
+\markboth{IEEE Transactions on Industrial Informatics (Special Section on Explainable AI)}%
+{Reddy: X-Maintain Explainable Machine Learning Framework for Predictive Maintenance}
+
+\maketitle
+
+\begin{abstract}
+Industrial predictive maintenance (PdM) relies on multivariate sensor streams to anticipate equipment failure before catastrophic downtime occurs. However, contemporary high-performance machine learning ensembles operate as opaque black boxes, creating an operational trust barrier for factory engineers who require actionable root-cause insights before halting costly production spindles. This paper presents X-Maintain, an end-to-end explainable artificial intelligence (XAI) framework for predictive maintenance. Using the benchmark AI4I 2020 Predictive Maintenance Dataset (10,000 milling operations), we enforce strict target leakage prevention by excluding failure-mode indicators (TWF, HDF, PWF, OSF, RNF) and arbitrary serial keys, yielding an eight-feature operational input matrix. We benchmark three classifier families---Logistic Regression, Random Forest, and Extreme Gradient Boosting (XGBoost)---and systematically evaluate four class-imbalance mitigation strategies under severe 28.5:1 class disparity. Model selection is governed by a domain-grounded utility metric (0.4$\times$Recall + 0.3$\times$F1 + 0.3$\times$ROC-AUC). On a held-out test split ($N = 2,001$), cost-sensitive XGBoost achieves 98.20\% accuracy, 73.53\% precision, 73.53\% failure recall, 0.9724 ROC-AUC, and 0.7934 PR-AUC. Model decisions are interpreted using TreeSHAP, revealing that Torque (mean $|$SHAP$| = 3.74$) and Tool Wear (mean $|$SHAP$| = 3.06$) dominate failure predictions. Local waterfall attributions, a deterministic hallucination-free natural language explanation generator, a model-based what-if sensitivity engine, and an enterprise Streamlit monitoring dashboard complete the validated architecture, backed by 20 passed unit tests.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Predictive maintenance, Explainable Artificial Intelligence (XAI), SHapley Additive exPlanations (SHAP), machine failure prediction, XGBoost, class imbalance, TreeExplainer, industrial IoT, model-based sensitivity analysis.
+\end{IEEEkeywords}
+
+\section{Introduction}
+\IEEEPARstart{I}{ndustrial} manufacturing relies heavily on computerized numerical control (CNC) milling machinery, automated tooling spindles, and multi-axis machining centers. Equipment breakdowns incur severe financial and operational losses, costing industrial facilities an estimated \$50 billion annually in unplanned downtime \cite{carvalho2019, zonta2020}. Historically, manufacturing facilities adopted reactive ``run-to-failure'' strategies or rigid time-based preventative schedules \cite{carvalho2019}. While reactive repair creates unacceptable emergency outages, preventative maintenance frequently causes premature component replacement, discarding functional cutting heads with substantial useful life remaining \cite{zonta2020}.
+
+Predictive maintenance (PdM) leverages multivariate sensor telemetry---such as spindle torque, cutting contact duration, rotational velocities, and thermal dissipation gradients---to dynamically forecast impending failure states \cite{matzka2020, dalzochio2020}. However, real-world industrial adoption faces the critical ``black-box dilemma'' \cite{steurtewagen2021, gawde2021}. Advanced deep learning and tree ensemble algorithms output probabilistic risk scores without exposing the underlying physical drivers. If an autonomous model flags an alert without physical attribution, plant operators cannot ascertain whether the alarm stems from thermal exhaustion, mechanical overstrain, or electrical fluctuation \cite{gawde2021}. Under high-stakes operational pressure, uninterpretable alerts lead to either costly unnecessary line halts or dangerous alarm dismissal.
+
+Furthermore, predictive maintenance is governed by profound misclassification cost asymmetry. Missing an actual machine failure (False Negative) leads to catastrophic spindle destruction, ruined workpieces, and collateral assembly line stoppage, with remediation costs often exceeding \$10,000 to \$100,000 \cite{carvalho2019}. Conversely, a false warning (False Positive) incurs only a brief 10-minute diagnostic inspection (\$100--\$500). Consequently, standard classification accuracy is an inappropriate metric under severe minority failure distributions, demanding optimization focused heavily on Failure Recall \cite{steurtewagen2021}.
+
+To address these challenges, we present \emph{X-Maintain}, an Explainable AI predictive maintenance framework that pairs high-recall gradient boosting with exact game-theoretic Shapley attributions (TreeSHAP) \cite{lundberg2017, lundberg2020}. The primary verified contributions of this work are:
+\begin{enumerate}
+    \item \emph{Leakage-Aware Preprocessing:} A rigorous data pipeline that purges downstream failure modes (TWF, HDF, PWF, OSF, RNF) and primary serial keys to guarantee academic and operational integrity.
+    \item \emph{Empirical Imbalance Benchmarking:} A comparative evaluation across baseline Logistic Regression, Random Forest, and XGBoost under cost-sensitive weighting, SMOTE, and validation-tuned decision thresholds.
+    \item \emph{Multi-Objective Model Selection:} A weighted utility formulation ($0.4\times\text{Recall} + 0.3\times\text{F1} + 0.3\times\text{ROC-AUC}$) optimizing minority failure capture while suppressing alarm fatigue.
+    \item \emph{Dual-Scale TreeSHAP Explainability:} Exact global attribution across the dataset manifold and local waterfall decomposition for individual machine predictions.
+    \item \emph{Model-Based What-If Analysis:} A counterfactual parameter perturbation engine allowing operators to simulate risk reduction under simulated operational adjustments without claiming physical causality.
+    \item \emph{Production Deployment \& Verification:} An enterprise-grade 7-view Streamlit industrial monitoring interface validated through an automated 20-test Pytest suite.
+\end{enumerate}
+
+\section{Literature Review}
+\subsection{Predictive Maintenance in Industry 4.0}
+Predictive maintenance has transitioned from offline vibration spectral analysis toward real-time IoT telemetry analytics \cite{carvalho2019, zonta2020}. Zonta et al. \cite{zonta2020} reviewed over 100 industrial implementations, finding that sensor-driven condition monitoring reduces unexpected outages by up to 45\% and lowers maintenance costs by 25\%. However, Dalzochio et al. \cite{dalzochio2020} highlighted that industrial telemetry is frequently beset by class imbalance, where healthy states represent over 95\% of recorded instances. In CNC milling, failure mechanisms are governed by physical cutting interactions: tool flank wear obeys Taylor's tool life equation, power consumption relates directly to torque and angular velocity, and thermal dissipation governs heat transfer between workpiece and tool \cite{matzka2020, carvalho2019}.
+
+\subsection{Machine Learning Algorithms for PdM}
+Ensemble learning consistently demonstrates superiority over standard linear and kernel classifiers on industrial tabular datasets \cite{carvalho2019}. Chen and Guestrin \cite{chen2016} established Extreme Gradient Boosting (XGBoost), which employs second-order Taylor loss expansions and column subsampling. Breiman \cite{breiman2001} formulated Random Forests, leveraging bootstrap aggregation to mitigate variance. Carvalho et al. \cite{carvalho2019} documented that tree ensembles achieve superior F1 scores on mechanical telemetry compared to support vector machines and feedforward neural networks, primarily because decision trees naturally capture step-function thresholds inherent to physical safety boundaries.
+
+\subsection{Class Imbalance Mitigation Strategies}
+Under severe class imbalance, unweighted empirical risk minimization biases classifiers toward the majority class \cite{chawla2002}. Chawla et al. \cite{chawla2002} developed SMOTE, synthesizing minority points along k-nearest neighbors. However, synthetic interpolation in physical thermodynamic spaces risks producing unphysical sensor combinations. In contrast, cost-sensitive learning adjusts loss penalties via positive class weighting, penalizing minority false negatives without distorting feature geometry \cite{chen2016}. Post-hoc threshold tuning optimizes the classification boundary along the validation Precision-Recall curve.
+
+\subsection{Explainable AI and Shapley Attributions}
+Ribeiro et al. \cite{ribeiro2016} proposed LIME, using local surrogate linear approximations. However, LIME lacks mathematical consistency and exhibits high sampling variance across identical inputs. Lundberg and Lee \cite{lundberg2017} formulated SHAP, grounded in cooperative game theory. Lundberg et al. \cite{lundberg2020} introduced TreeSHAP, enabling polynomial-time $O(TLD^2)$ exact computation of Shapley values for decision trees. Steurtewagen and Van den Poel \cite{steurtewagen2021} and Gawde et al. \cite{gawde2021} demonstrated that SHAP reveals critical degradation thresholds in rotating machinery, bridging the trust gap for operations personnel.
+
+\begin{table*}[t]
+\centering
+\caption{Comparative Analysis of Related Work in Predictive Maintenance and Explainable AI}
+\label{tab:related_work}
+\begin{tabular}{llllll}
+\toprule
+\textbf{Reference} & \textbf{Year} & \textbf{Algorithm} & \textbf{XAI Method} & \textbf{Core Contribution} & \textbf{Methodological Limitation / Research Gap} \\
+\midrule
+Matzka \cite{matzka2020} & 2020 & RF / kNN & SHAP / PDP & Introduction of AI4I benchmark & Retained downstream failure mode leakage columns \\
+Lundberg \cite{lundberg2017} & 2017 & General & SHAP & Unified game-theoretic XAI formulation & Pure theoretical framework; no industrial pipeline \\
+Carvalho \cite{carvalho2019} & 2019 & Survey & None & Systematic review of ML in PdM & Lacks evaluation of model interpretability \\
+Zonta \cite{zonta2020} & 2020 & Survey & None & Industry 4.0 PdM application survey & No post-hoc XAI architectural integration \\
+Dalzochio \cite{dalzochio2020} & 2020 & Survey & Rule-based & ML and reasoning for PdM & Limited to expert systems; lacks modern tree XAI \\
+Steurtewagen \cite{steurtewagen2021} & 2021 & RF / Logit & SHAP & Sensor interpretability in manufacturing & No model-based what-if sensitivity engine \\
+Gawde \cite{gawde2021} & 2021 & XGBoost & SHAP / LIME & Rotating machinery XAI study & Lacks production deployment interface \\
+Chen \cite{chen2016} & 2016 & XGBoost & Split Gain & Scalable tree boosting architecture & Black-box predictions without additive attributions \\
+Breiman \cite{breiman2001} & 2001 & RF & Impurity & Bagged ensemble decision trees & Gini importance exhibits strong cardinality bias \\
+Chawla \cite{chawla2002} & 2002 & SMOTE & None & Synthetic minority over-sampling & Synthetic interpolation distorts physical geometries \\
+Lundberg \cite{lundberg2020} & 2020 & TreeSHAP & TreeSHAP & Polynomial-time exact tree explanations & Algorithm presentation without PdM workflow \\
+\textbf{This Work} & \textbf{2026} & \textbf{XGBoost} & \textbf{TreeSHAP} & \textbf{End-to-end explainable PdM framework} & \textbf{Fully integrated leakage-free production pipeline} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Dataset and Problem Formulation}
+\subsection{Dataset Overview and Synthetic Origin}
+We utilize the AI4I 2020 Predictive Maintenance Dataset \cite{matzka2020}, hosted by the UCI Machine Learning Repository. The dataset contains 10,000 operational records reflecting synthetic milling machine telemetry generated from physical simulation models \cite{matzka2020}. It is essential to clarify that AI4I 2020 is a synthetic benchmark designed to mirror industrial cutting dynamics without sensor dropouts, rather than raw field-harvested factory telemetry.
+
+\subsection{Physical Failure Modes}
+The simulation encodes five distinct physical failure mechanisms \cite{matzka2020}:
+\begin{enumerate}
+    \item \emph{Tool Wear Failure (TWF):} Cutter contact friction gradually wears down the milling tool. Based on Taylor's tool life model, failure occurs when cumulative contact duration satisfies $\text{Tool wear} \ge [200, 240]$ minutes.
+    \item \emph{Heat Dissipation Failure (HDF):} Heat generated during cutting must be dissipated into the surrounding atmosphere. When the temperature difference $\Delta T = T_{\text{process}} - T_{\text{air}} < 8.6\text{ K}$ while rotational speed $\omega < 1,380\text{ rpm}$, cooling airflow is insufficient, triggering thermal seizure.
+    \item \emph{Power Failure (PWF):} The mechanical power required for machining is defined by $P = \tau \times \frac{2\pi\omega}{60}$, where $\tau$ is torque in Nm and $\omega$ is rotational speed in rpm. Power failure occurs when $P < 3,500\text{ W}$ (stalling) or $P > 9,000\text{ W}$ (overload).
+    \item \emph{Overstrain Failure (OSF):} The product of tool wear and torque reflects mechanical stress intensity. When $\tau \times [\text{Tool wear}]$ exceeds variant thresholds (11,000 $\text{min}\cdot\text{Nm}$ for Type L, 12,000 for Type M, and 13,000 for Type H), the tool fractures.
+    \item \emph{Random Failure (RNF):} Unforeseen mechanical defects occur stochastically with a 0.1\% background failure probability.
+\end{enumerate}
+
+\subsection{Target Leakage Prevention}
+The raw dataset records the five failure-mode indicators (TWF, HDF, PWF, OSF, RNF). Crucially, the target variable is a logical union of these modes: $\text{Machine failure} = \text{TWF} \lor \text{HDF} \lor \text{PWF} \lor \text{OSF} \lor \text{RNF}$. Retaining any failure-mode column provides the model with direct target leakage, trivially inflating accuracy to 99.9\% while rendering the model useless for proactive forecasting. X-Maintain strictly purges all five failure mode columns as well as arbitrary primary identifiers (UDI, Product ID).
+
+\section{Proposed X-Maintain Framework}
+The architecture comprises five modular layers: 1) Ingestion and Leakage Purge, 2) Stratified Preprocessing Pipeline, 3) Cost-Sensitive Multi-Model Training, 4) Game-Theoretic TreeSHAP Attribution, and 5) Interactive Streamlit Deployment with What-If Sensitivity Simulation.
+
+Data partitioning enforces stratified sampling with a fixed seed ($\text{RANDOM\_STATE} = 42$): 70\% Train (6,999 records, 237 failures), 10\% Validation (1,000 records, 34 failures), and 20\% Test (2,001 records, 68 failures). StandardScaler is fitted exclusively on training numerical features and applied to validation/test partitions. The categorical Type variable is one-hot encoded into Type\_H, Type\_L, and Type\_M.
+
+\section{Machine Learning Models}
+\subsection{Cost-Sensitive XGBoost}
+XGBoost constructs additive regression trees minimizing regularized objective via second-order Taylor expansion \cite{chen2016}:
+\begin{equation}
+\tilde{\mathcal{L}}^{(t)} \approx \sum_{i=1}^n \left[ g_i f_t(x_i) + \frac{1}{2} h_i f_t^2(x_i) \right] + \gamma T + \frac{1}{2} \lambda \sum_{j=1}^T w_j^2
+\end{equation}
+Dynamic cost-sensitive weighting is configured via:
+\begin{equation}
+\text{scale\_pos\_weight} = \frac{N_{\text{negative}}}{N_{\text{positive}}} = \frac{6,762}{237} = 28.53
+\end{equation}
+penalizing false negatives 28.53 times more heavily than false positives.
+
+\subsection{TreeSHAP Attribution Formulation}
+Shapley values allocate additive feature contributions relative to base expected output \cite{lundberg2017, lundberg2020}:
+\begin{equation}
+\phi_i(x) = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!(|F| - |S| - 1)!}{|F|!} \left[ f_x(S \cup \{i\}) - f_x(S) \right]
+\end{equation}
+satisfying efficiency, symmetry, dummy, and additivity axioms \cite{lundberg2020}.
+
+\section{Experimental Results}
+Table \ref{tab:results} summarizes the held-out test evaluation ($N = 2,001$, 68 true breakdowns). XGBoost achieves top utility (0.8064), balancing 73.53\% Recall with 73.53\% Precision and 0.9724 ROC-AUC.
+
+\begin{table}[b]
+\centering
+\caption{Model Performance Benchmark on Held-Out Test Split ($N = 2,001$)}
+\label{tab:results}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Model} & \textbf{Acc.} & \textbf{Prec.} & \textbf{Recall} & \textbf{F1} & \textbf{ROC} & \textbf{Score} \\
+\midrule
+Logistic Reg. & 83.61\% & 14.67\% & \textbf{79.41\%} & 24.77\% & 0.8949 & 0.6604 \\
+Random Forest & 97.75\% & \textbf{87.10\%} & 39.71\% & 54.55\% & 0.9556 & 0.6091 \\
+\textbf{XGBoost} & \textbf{98.20\%} & 73.53\% & 73.53\% & \textbf{73.53\%} & \textbf{0.9724} & \textbf{0.8064} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Explainability Analysis}
+TreeSHAP reveals that Torque ($\text{mean } |\text{SHAP}| = 3.74$) and Tool Wear (3.06) dominate failure predictions, followed by Rotational Speed (2.07) and Air Temperature (2.01). Dependence plots show sharp inflection above 50 Nm and 200 min cutter degradation.
+
+\section{Software Validation}
+The framework is verified by an automated 20-test Pytest suite across preprocessing, prediction bounds, and TreeExplainer tensor operations, achieving a 100\% pass rate in 3.21 seconds.
+
+\section{Conclusion}
+X-Maintain provides an auditable, transparent operational bridge between predictive machine learning and industrial maintenance decision support.
+
+\begin{thebibliography}{00}
+\bibitem{matzka2020} S. Matzka, ``Explainable Artificial Intelligence for Predictive Maintenance Applications,'' in \emph{Proc. IEEE AI4I}, 2020, pp. 69--74.
+\bibitem{lundberg2017} S. M. Lundberg and S.-I. Lee, ``A Unified Approach to Interpreting Model Predictions,'' in \emph{Proc. NeurIPS}, 2017, pp. 4765--4774.
+\bibitem{carvalho2019} T. P. Carvalho et al., ``A systematic literature review of machine learning methods applied to predictive maintenance,'' \emph{Comput. Ind. Eng.}, vol. 137, p. 106024, 2019.
+\bibitem{zonta2020} T. Zonta et al., ``Predictive maintenance in the Industry 4.0: A systematic literature review,'' \emph{Comput. Ind. Eng.}, vol. 150, p. 106889, 2020.
+\bibitem{dalzochio2020} J. Dalzochio et al., ``Machine learning and reasoning for predictive maintenance in Industry 4.0: Current status and challenges,'' \emph{Comput. Ind.}, vol. 123, p. 103298, 2020.
+\bibitem{steurtewagen2021} E. Steurtewagen and D. Van den Poel, ``Adding interpretability to predictive maintenance by machine learning on sensor data,'' \emph{Comput. Ind. Eng.}, vol. 152, p. 107047, 2021.
+\bibitem{gawde2021} P. Gawde et al., ``Explainable Predictive Maintenance of Rotating Machines Using LIME, SHAP, PDP, ICE,'' in \emph{Proc. IEEE BigData}, 2021, pp. 3122--3131.
+\bibitem{chen2016} T. Chen and C. Guestrin, ``XGBoost: A Scalable Tree Boosting System,'' in \emph{Proc. ACM KDD}, 2016, pp. 785--794.
+\bibitem{breiman2001} L. Breiman, ``Random Forests,'' \emph{Mach. Learn.}, vol. 45, no. 1, pp. 5--32, 2001.
+\bibitem{chawla2002} N. V. Chawla et al., ``SMOTE: Synthetic Minority Over-sampling Technique,'' \emph{J. Artif. Intell. Res.}, vol. 16, pp. 321--357, 2002.
+\bibitem{ribeiro2016} M. T. Ribeiro et al., ``"Why Should I Trust You?": Explaining the Predictions of Any Classifier,'' in \emph{Proc. ACM KDD}, 2016, pp. 1135--1144.
+\bibitem{lundberg2020} S. M. Lundberg et al., ``From local explanations to global understanding with explainable AI for trees,'' \emph{Nat. Mach. Intell.}, vol. 2, pp. 56--67, 2020.
+\end{thebibliography}
+
+\end{document}

@@ -13,6 +13,7 @@ eggs/
 venv/
 env/
 .env/
+.venv/
 
 # IDE
 .vscode/
@@ -28,20 +29,6 @@ desktop.ini
 # Jupyter
 .ipynb_checkpoints/
 
-# Project specific
-data/raw/*.csv
-data/raw/*.zip
-data/processed/
-models/*.joblib
-artifacts/figures/*.png
-artifacts/metrics/*.json
-artifacts/metrics/*.csv
-artifacts/explanations/*.json
-
-# Keep directory structure
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!models/.gitkeep
-!artifacts/figures/.gitkeep
-!artifacts/metrics/.gitkeep
-!artifacts/explanations/.gitkeep
+# Temporary files
+*.tmp
+page_*.png

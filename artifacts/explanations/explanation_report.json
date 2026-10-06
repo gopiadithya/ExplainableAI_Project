@@ -1,0 +1,49 @@
+{
+    "sample_index": 11,
+    "true_label": 1,
+    "predicted_probability": 0.9999897480010986,
+    "risk_category": "High Risk",
+    "feature_contributions": [
+        {
+            "feature": "Torque (Nm)",
+            "shap_value": 7.368854522705078,
+            "direction": "increases risk"
+        },
+        {
+            "feature": "Tool wear (min)",
+            "shap_value": 4.19009256362915,
+            "direction": "increases risk"
+        },
+        {
+            "feature": "Air temperature (K)",
+            "shap_value": -1.313889503479004,
+            "direction": "decreases risk"
+        },
+        {
+            "feature": "Type_L",
+            "shap_value": 0.4355931282043457,
+            "direction": "increases risk"
+        },
+        {
+            "feature": "Process temperature (K)",
+            "shap_value": 0.40683770179748535,
+            "direction": "increases risk"
+        },
+        {
+            "feature": "Rotational speed (rpm)",
+            "shap_value": 0.3084384799003601,
+            "direction": "increases risk"
+        },
+        {
+            "feature": "Type_M",
+            "shap_value": 0.09597724676132202,
+            "direction": "increases risk"
+        },
+        {
+            "feature": "Type_H",
+            "shap_value": 0.016555503010749817,
+            "direction": "increases risk"
+        }
+    ],
+    "natural_language_explanation": "The model predicts a HIGH failure risk (probability: 1.00). The strongest factors contributing to this prediction are: Torque (Nm) (increases risk), Tool wear (min) (increases risk), Type_L (increases risk). Factors decreasing risk: Air temperature (K) (decreases risk)."
+}
