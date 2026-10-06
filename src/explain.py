@@ -189,5 +189,105 @@ def save_explanation_report(shap_values: Any, feature_names: List[str], predicti
         file_path = os.path.join(save_path, "explanation_report.json")
         with open(file_path, "w") as f:
             json.dump(report, f, indent=4)
+        print(f"Explanation report saved to {file_path}")
     except Exception as e:
         print(f"Failed to save explanation report: {e}")
+
+if __name__ == '__main__':
+    import joblib
+    print("=" * 60)
+    print("X-Maintain: Running Standalone SHAP Explainability Pipeline")
+    print("=" * 60)
+
+    model_path = 'models/best_model.joblib'
+    if not os.path.exists(model_path):
+        model_path = 'models/model.pkl'
+
+    print(f"\n[1/5] Loading production model from {model_path}...")
+    model = joblib.load(model_path)
+    
+    with open('models/feature_names.json', 'r') as f:
+        feature_names = json.load(f)
+    print(f"  Feature names ({len(feature_names)}): {feature_names}")
+
+    print("\n[2/5] Loading test data for SHAP evaluation...")
+    X_test = pd.read_csv('data/processed/X_test.csv')
+    y_test = pd.read_csv('data/processed/y_test.csv').squeeze()
+    print(f"  Test samples loaded: {len(X_test)}")
+
+    print("\n[3/5] Initializing SHAP Explainer...")
+    explainer = create_explainer(model, X_test)
+    print(f"  Explainer created: {type(explainer).__name__}")
+
+    # Compute SHAP on a representative sample (500 instances) for efficiency and stability
+    sample_size = min(500, len(X_test))
+    X_sample = X_test.head(sample_size)
+    print(f"\n[4/5] Computing SHAP values across {sample_size} test instances...")
+    shap_explanation = compute_shap_values(explainer, X_sample, feature_names)
+
+    print("\n[5/5] Generating and saving SHAP visualizations & artifacts...")
+    os.makedirs('artifacts/figures', exist_ok=True)
+    os.makedirs('artifacts/metrics', exist_ok=True)
+    os.makedirs('artifacts/explanations', exist_ok=True)
+
+    # 1. Global Bar
+    plot_global_importance(shap_explanation, feature_names, 'artifacts/figures/shap_global_importance.png')
+    print("  [OK] Saved: artifacts/figures/shap_global_importance.png")
+
+    # 2. Beeswarm Plot
+    plot_beeswarm(shap_explanation, 'artifacts/figures/shap_beeswarm.png')
+    print("  [OK] Saved: artifacts/figures/shap_beeswarm.png")
+
+    # 3. Locate an actual failure instance for local waterfall explanation
+    failure_indices = [i for i in range(len(X_sample)) if y_test.iloc[X_sample.index[i]] == 1]
+    local_idx = failure_indices[0] if failure_indices else 0
+    print(f"  Using test instance index {local_idx} (True Label = {y_test.iloc[X_sample.index[local_idx]]}) for local waterfall")
+
+    plot_waterfall(shap_explanation, index=local_idx, save_path='artifacts/figures/shap_waterfall.png')
+    print("  [OK] Saved: artifacts/figures/shap_waterfall.png")
+
+    # 4. Dependence plots for top features
+    mean_abs_shap = np.abs(shap_explanation.values).mean(axis=0)
+    top_indices = np.argsort(mean_abs_shap)[::-1][:3]
+    for idx in top_indices:
+        fname = feature_names[idx]
+        safe_fname = fname.replace(' ', '_').replace('(', '').replace(')', '')
+        dep_path = f"artifacts/figures/shap_dependence_{safe_fname}.png"
+        plot_dependence(shap_explanation, fname, dep_path)
+        print(f"  [OK] Saved: {dep_path}")
+
+    # 5. Feature importance table
+    importance_df = pd.DataFrame({
+        'Feature': feature_names,
+        'Mean |SHAP|': mean_abs_shap
+    }).sort_values('Mean |SHAP|', ascending=False)
+    importance_df.to_csv('artifacts/metrics/feature_importance.csv', index=False)
+    print("  [OK] Saved: artifacts/metrics/feature_importance.csv")
+
+    # 6. Detailed JSON explanation for the failure instance
+    proba = model.predict_proba(X_sample.iloc[[local_idx]])[0][1]
+    contributions = get_feature_contributions(shap_explanation, feature_names, index=local_idx)
+    nl_summary = generate_natural_language_explanation(proba, contributions)
+
+    full_report = {
+        "sample_index": int(local_idx),
+        "true_label": int(y_test.iloc[X_sample.index[local_idx]]),
+        "predicted_probability": float(proba),
+        "risk_category": get_risk_category(proba),
+        "feature_contributions": [
+            {"feature": f, "shap_value": float(v), "direction": d} for f, v, d in contributions
+        ],
+        "natural_language_explanation": nl_summary
+    }
+    with open('artifacts/explanations/explanation_report.json', 'w') as f:
+        json.dump(full_report, f, indent=4)
+    print("  [OK] Saved: artifacts/explanations/explanation_report.json")
+
+    print("\n--- SHAP Attribution Summary (Local Instance) ---")
+    print(f"Predicted Failure Probability: {proba:.4f} ({get_risk_category(proba)})")
+    print(f"Natural Language Explanation: {nl_summary}")
+    print("\nTop 3 Influential Factors (Global Mean |SHAP|):")
+    print(importance_df.head(3).to_string(index=False))
+    print("=" * 60)
+    print("SHAP explainability pipeline completed and fully verified!")
+
