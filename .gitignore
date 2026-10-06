@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+
+# Virtual Environment
+venv/
+env/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Project specific
+data/raw/*.csv
+data/raw/*.zip
+data/processed/
+models/*.joblib
+artifacts/figures/*.png
+artifacts/metrics/*.json
+artifacts/metrics/*.csv
+artifacts/explanations/*.json
+
+# Keep directory structure
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!models/.gitkeep
+!artifacts/figures/.gitkeep
+!artifacts/metrics/.gitkeep
+!artifacts/explanations/.gitkeep
