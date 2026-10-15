@@ -108,8 +108,8 @@ def build_pdf():
 
     # First Page Frames:
     # Header frame for Title, Authors, Abstract, Index Terms
-    # Exact measured height: ~243 pt. Setting HEADER_H = 262 pt ensures zero overflow into columns!
-    HEADER_H = 262
+    # Exact measured height: ~265 pt with 3 authors + emails. Setting HEADER_H = 282 pt ensures zero overflow into columns!
+    HEADER_H = 282
     frame_top = Frame(
         MARGIN_X, PAGE_H - 36 - HEADER_H, PRINT_W, HEADER_H,
         id='F_header', topPadding=0, bottomPadding=0, leftPadding=0, rightPadding=0
@@ -303,9 +303,21 @@ def build_pdf():
     # -------------------------------------------------------------
     # HEADER BLOCK (Page 1 Full-Width Frame)
     # -------------------------------------------------------------
-    story.append(Paragraph("X-Maintain: An Explainable Machine Learning Framework for Predictive Maintenance and Machine Failure Prediction", style_title))
-    story.append(Paragraph("S. Gopi Adithya Vardhan Reddy, Dhanireddy Venkata Hemanth Reddy, and Mutyala Harsha Vardhan", style_author))
-    story.append(Paragraph("Department of Computer Science and Engineering, Vellore Institute of Technology, Vellore, Tamil Nadu 632014, India<br/>(e-mails: gopiadithya2005@gmail.com, hemanth.reddy2023@vitstudent.ac.in, mutyala.harsha2023@vitstudent.ac.in)", style_affil))
+    story.append(Paragraph("X-Maintain: An Explainable Machine Learning Framework for<br/>Predictive Maintenance and Machine Failure Prediction", style_title))
+    story.append(Paragraph(
+        "S. Gopi Adithya Vardhan Reddy<super>1</super>, "
+        "Dhanireddy Venkata Hemanth Reddy<super>2</super>, "
+        "and Mutyala Harsha Vardhan<super>3</super>",
+        style_author
+    ))
+    story.append(Paragraph(
+        "<i>Department of Computer Science and Engineering</i><br/>"
+        "Vellore Institute of Technology, Vellore, Tamil Nadu 632014, India<br/>"
+        "<super>1</super>gopiadithya2005@gmail.com, "
+        "<super>2</super>hemanth.reddy2023@vitstudent.ac.in, "
+        "<super>3</super>mutyala.harsha2023@vitstudent.ac.in",
+        style_affil
+    ))
 
     abstract_text = (
         "<b><i>Abstract</i>—Industrial predictive maintenance (PdM) relies on multivariate sensor telemetry to anticipate equipment "
@@ -448,25 +460,25 @@ def build_pdf():
         style_body
     ))
 
-    # TABLE I: TAXONOMIC COMPARISON OF 12 BENCHMARK LITERATURE STUDIES
-    t1_title = Paragraph("TABLE I: TAXONOMIC COMPARISON OF 12 BENCHMARK LITERATURE STUDIES IN PREDICTIVE MAINTENANCE AND EXPLAINABLE AI", style_table_title)
+    # TABLE I: COMPARATIVE ANALYSIS OF RELATED WORK
+    t1_title = Paragraph("TABLE I: COMPARATIVE ANALYSIS OF RELATED WORK IN PREDICTIVE MAINTENANCE AND EXPLAINABLE AI", style_table_title)
     table1_data = [
-        [Paragraph("<b># & Ref.</b>", style_t_header), Paragraph("<b>Yr</b>", style_t_header), Paragraph("<b>Method</b>", style_t_header), Paragraph("<b>XAI</b>", style_t_header), Paragraph("<b>Focus & Contributions</b>", style_t_header), Paragraph("<b>Gap Addressed by X-Maintain</b>", style_t_header), Paragraph("<b>Rel.</b>", style_t_header)],
-        [Paragraph("<b>[1]</b> Matzka", style_t_cell), Paragraph("20", style_t_cell), Paragraph("RF, kNN, DT", style_t_cell), Paragraph("TreeSHAP", style_t_cell), Paragraph("AI4I benchmark introduction", style_t_cell), Paragraph("Retained leakage cols (TWF..RNF)", style_t_cell), Paragraph("★★★★★", style_t_cell)],
-        [Paragraph("<b>[2]</b> Gawde et al.", style_t_cell), Paragraph("21", style_t_cell), Paragraph("XGB, LGBM", style_t_cell), Paragraph("SHAP, LIME", style_t_cell), Paragraph("XAI for rotating machines", style_t_cell), Paragraph("No deployment UI or simulator", style_t_cell), Paragraph("★★★★★", style_t_cell)],
-        [Paragraph("<b>[3]</b> Steurtewagen", style_t_cell), Paragraph("21", style_t_cell), Paragraph("RF, Logit", style_t_cell), Paragraph("TreeSHAP", style_t_cell), Paragraph("Sensor telemetry interpretability", style_t_cell), Paragraph("Static; no imbalance benchmarking", style_t_cell), Paragraph("★★★★★", style_t_cell)],
-        [Paragraph("<b>[4]</b> Lundberg-Lee", style_t_cell), Paragraph("17", style_t_cell), Paragraph("General ML", style_t_cell), Paragraph("SHAP", style_t_cell), Paragraph("Axiomatic attribution theory", style_t_cell), Paragraph("Theory only; no PdM pipeline", style_t_cell), Paragraph("★★★★★", style_t_cell)],
-        [Paragraph("<b>[5]</b> Rajaoarisoa", style_t_cell), Paragraph("24", style_t_cell), Paragraph("Trees, SVM", style_t_cell), Paragraph("SHAP, CF", style_t_cell), Paragraph("XAI for maintenance decisions", style_t_cell), Paragraph("No severe imbalance tuning", style_t_cell), Paragraph("★★★★★", style_t_cell)],
-        [Paragraph("<b>[6]</b> Zonta et al.", style_t_cell), Paragraph("20", style_t_cell), Paragraph("Survey (100+)", style_t_cell), Paragraph("None", style_t_cell), Paragraph("Industry 4.0 PdM review (ROI)", style_t_cell), Paragraph("Identified black-box gap; no XAI", style_t_cell), Paragraph("★★★★☆", style_t_cell)],
-        [Paragraph("<b>[7]</b> Carvalho et al.", style_t_cell), Paragraph("19", style_t_cell), Paragraph("Survey (ML)", style_t_cell), Paragraph("None", style_t_cell), Paragraph("Review of ML algorithms in PdM", style_t_cell), Paragraph("Survey only; no XAI evaluation", style_t_cell), Paragraph("★★★★☆", style_t_cell)],
-        [Paragraph("<b>[8]</b> Dalzochio et al.", style_t_cell), Paragraph("20", style_t_cell), Paragraph("Rules, Ontol.", style_t_cell), Paragraph("Rules", style_t_cell), Paragraph("Reasoning & ML in Industry 4.0", style_t_cell), Paragraph("Brittle rules; lacks tree Shapley XAI", style_t_cell), Paragraph("★★★★☆", style_t_cell)],
-        [Paragraph("<b>[9]</b> Taşcı et al.", style_t_cell), Paragraph("23", style_t_cell), Paragraph("RF, XGBoost", style_t_cell), Paragraph("MDI, Perm.", style_t_cell), Paragraph("RUL prediction in manufacturing", style_t_cell), Paragraph("Impurity bias; no local SHAP audit", style_t_cell), Paragraph("★★★★☆", style_t_cell)],
-        [Paragraph("<b>[10]</b> Lin et al.", style_t_cell), Paragraph("25", style_t_cell), Paragraph("Cost-XGBoost", style_t_cell), Paragraph("SHAP", style_t_cell), Paragraph("Failure estimation & scheduling", style_t_cell), Paragraph("Omitted SMOTE vs cost-weights", style_t_cell), Paragraph("★★★★★", style_t_cell)],
-        [Paragraph("<b>[11]</b> Popoola et al.", style_t_cell), Paragraph("26", style_t_cell), Paragraph("GBDT, Ensemb.", style_t_cell), Paragraph("SHAP, LIME", style_t_cell), Paragraph("XAI for fluid/water networks", style_t_cell), Paragraph("Fluid domain; lacks tool wear physics", style_t_cell), Paragraph("★★★★☆", style_t_cell)],
-        [Paragraph("<b>[12]</b> Obeten-Jimoh", style_t_cell), Paragraph("26", style_t_cell), Paragraph("Physics-XGB", style_t_cell), Paragraph("TreeSHAP", style_t_cell), Paragraph("Physics-informed cost-aware PdM", style_t_cell), Paragraph("Lacks deployment UI & test suite", style_t_cell), Paragraph("★★★★★", style_t_cell)],
-        [Paragraph("<b>This Work</b>", style_t_cell), Paragraph("<b>26</b>", style_t_cell), Paragraph("<b>XGBoost</b>", style_t_cell), Paragraph("<b>TreeSHAP</b>", style_t_cell), Paragraph("<b>End-to-end explainable PdM</b>", style_t_cell), Paragraph("<b>Unified leakage-free architecture</b>", style_t_cell), Paragraph("<b>★★★★★</b>", style_t_cell)]
+        [Paragraph("<b>Ref.</b>", style_t_header), Paragraph("<b>Year</b>", style_t_header), Paragraph("<b>Methodology</b>", style_t_header), Paragraph("<b>XAI Method</b>", style_t_header), Paragraph("<b>Core Contribution</b>", style_t_header), Paragraph("<b>Limitation / Gap Addressed</b>", style_t_header)],
+        [Paragraph("[1]", style_t_cell), Paragraph("2020", style_t_cell), Paragraph("RF, kNN, DT", style_t_cell), Paragraph("TreeSHAP, PDP", style_t_cell), Paragraph("AI4I milling benchmark introduction", style_t_cell), Paragraph("Retained leakage columns (TWF..RNF)", style_t_cell)],
+        [Paragraph("[2]", style_t_cell), Paragraph("2021", style_t_cell), Paragraph("XGBoost, LGBM", style_t_cell), Paragraph("SHAP, LIME, ICE", style_t_cell), Paragraph("Multi-modal XAI on rotating machines", style_t_cell), Paragraph("No deployment interface or simulator", style_t_cell)],
+        [Paragraph("[3]", style_t_cell), Paragraph("2021", style_t_cell), Paragraph("RF, Logistic Reg.", style_t_cell), Paragraph("Kernel/TreeSHAP", style_t_cell), Paragraph("Sensor telemetry interpretability", style_t_cell), Paragraph("Static attribution; no imbalance study", style_t_cell)],
+        [Paragraph("[4]", style_t_cell), Paragraph("2017", style_t_cell), Paragraph("General ML", style_t_cell), Paragraph("SHAP (Theory)", style_t_cell), Paragraph("Unified axiomatic attribution theory", style_t_cell), Paragraph("Theoretical only; no domain PdM pipeline", style_t_cell)],
+        [Paragraph("[5]", style_t_cell), Paragraph("2024", style_t_cell), Paragraph("Trees, SVM", style_t_cell), Paragraph("SHAP, Counterfac.", style_t_cell), Paragraph("XAI for maintenance decision systems", style_t_cell), Paragraph("No severe imbalance tuning or NL rules", style_t_cell)],
+        [Paragraph("[6]", style_t_cell), Paragraph("2020", style_t_cell), Paragraph("Survey (100+)", style_t_cell), Paragraph("None", style_t_cell), Paragraph("Systematic Industry 4.0 PdM review", style_t_cell), Paragraph("Identified black-box gap; no empirical XAI", style_t_cell)],
+        [Paragraph("[7]", style_t_cell), Paragraph("2019", style_t_cell), Paragraph("Survey (ML)", style_t_cell), Paragraph("None", style_t_cell), Paragraph("Taxonomy of ML algorithms for PdM", style_t_cell), Paragraph("Survey only; no explainability evaluated", style_t_cell)],
+        [Paragraph("[8]", style_t_cell), Paragraph("2020", style_t_cell), Paragraph("Rules, Ontology", style_t_cell), Paragraph("Rule logic", style_t_cell), Paragraph("Reasoning and ML in Industry 4.0", style_t_cell), Paragraph("Brittle rules; lacks tree Shapley XAI", style_t_cell)],
+        [Paragraph("[9]", style_t_cell), Paragraph("2023", style_t_cell), Paragraph("RF, XGBoost, CatB", style_t_cell), Paragraph("MDI, Permutation", style_t_cell), Paragraph("RUL prediction in manufacturing", style_t_cell), Paragraph("Impurity bias; no local SHAP audit", style_t_cell)],
+        [Paragraph("[10]", style_t_cell), Paragraph("2025", style_t_cell), Paragraph("Cost-XGBoost", style_t_cell), Paragraph("SHAP summary", style_t_cell), Paragraph("Failure time estimation and scheduling", style_t_cell), Paragraph("Omitted SMOTE vs cost-weighting study", style_t_cell)],
+        [Paragraph("[11]", style_t_cell), Paragraph("2026", style_t_cell), Paragraph("GBDT, Ensembles", style_t_cell), Paragraph("SHAP, LIME", style_t_cell), Paragraph("Interpretable ML for fluid systems", style_t_cell), Paragraph("Fluid domain; lacks tool wear dynamics", style_t_cell)],
+        [Paragraph("[12]", style_t_cell), Paragraph("2026", style_t_cell), Paragraph("Physics-XGBoost", style_t_cell), Paragraph("TreeSHAP", style_t_cell), Paragraph("Physics-informed cost-aware PdM", style_t_cell), Paragraph("Lacks deployment UI and test suite", style_t_cell)],
+        [Paragraph("<b>Ours</b>", style_t_cell), Paragraph("<b>2026</b>", style_t_cell), Paragraph("<b>Cost-sens. XGBoost</b>", style_t_cell), Paragraph("<b>TreeSHAP (Dual)</b>", style_t_cell), Paragraph("<b>End-to-end explainable PdM</b>", style_t_cell), Paragraph("<b>Unified leakage-free verified pipeline</b>", style_t_cell)]
     ]
-    t1 = Table(table1_data, colWidths=[38, 12, 36, 30, 60, 56, 21])
+    t1 = Table(table1_data, colWidths=[22, 22, 44, 40, 62, 63])
     t1.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#e2e8f0")),
         ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor("#f1f5f9")),
@@ -1135,16 +1147,23 @@ def build_docx():
 
     author_p = doc.add_paragraph()
     author_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run_author = author_p.add_run("S. Gopi Adithya Vardhan Reddy, Dhanireddy Venkata Hemanth Reddy, and Mutyala Harsha Vardhan\n")
+    run_author = author_p.add_run("S. Gopi Adithya Vardhan Reddy1, Dhanireddy Venkata Hemanth Reddy2, and Mutyala Harsha Vardhan3\n")
     run_author.font.name = 'Times New Roman'
-    run_author.font.size = Pt(9.5)
+    run_author.font.size = Pt(10)
     run_author.font.bold = True
-    run_affil = author_p.add_run(
-        "Department of Computer Science and Engineering, Vellore Institute of Technology, Vellore, Tamil Nadu 632014, India\n"
-        "(e-mails: gopiadithya2005@gmail.com, hemanth.reddy2023@vitstudent.ac.in, mutyala.harsha2023@vitstudent.ac.in)"
-    )
-    run_affil.font.name = 'Times New Roman'
-    run_affil.font.size = Pt(8.5)
+    
+    affil_p = doc.add_paragraph()
+    affil_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run_dept = affil_p.add_run("Department of Computer Science and Engineering\n")
+    run_dept.font.name = 'Times New Roman'
+    run_dept.font.size = Pt(9)
+    run_dept.font.italic = True
+    run_inst = affil_p.add_run("Vellore Institute of Technology, Vellore, Tamil Nadu 632014, India\n")
+    run_inst.font.name = 'Times New Roman'
+    run_inst.font.size = Pt(8.5)
+    run_emails = affil_p.add_run("1gopiadithya2005@gmail.com, 2hemanth.reddy2023@vitstudent.ac.in, 3mutyala.harsha2023@vitstudent.ac.in")
+    run_emails.font.name = 'Times New Roman'
+    run_emails.font.size = Pt(8.0)
 
     abstract_p = doc.add_paragraph()
     abstract_p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
@@ -1244,24 +1263,24 @@ def build_docx():
     add_subsec_heading("E. Decision-Making Systems and Physics Grounding")
     add_body("Rajaoarisoa et al. [5] explored XAI for maintenance decision-support systems. Popoola et al. [11] applied interpretable ML to fluid systems. Obeten and Jimoh [12] demonstrated physics-informed cost-aware XAI on milling data, aligning TreeSHAP attributions with Taylor's cutting equations.")
 
-    add_caption("TABLE I: TAXONOMIC COMPARISON OF 12 BENCHMARK LITERATURE STUDIES IN PREDICTIVE MAINTENANCE AND EXPLAINABLE AI")
+    add_caption("TABLE I: COMPARATIVE ANALYSIS OF RELATED WORK IN PREDICTIVE MAINTENANCE AND EXPLAINABLE AI")
     table1_docx_data = [
-        ["# & Ref.", "Yr", "Methodology", "XAI Method", "Core Contributions & Focus", "Limitation / Gap Resolved by X-Maintain", "Rel."],
-        ["[1] Matzka", "2020", "RF, kNN, DT", "TreeSHAP, PDP", "AI4I milling benchmark introduction; initial XAI exploration", "Retained downstream leakage cols (TWF..RNF); inflated accuracy", "★★★★★"],
-        ["[2] Gawde et al.", "2021", "XGBoost, LGBM", "SHAP, LIME, ICE", "Multi-modal XAI on rotating machines; stability comparison", "Lacks deployment UI, what-if sensitivity simulator, & test suite", "★★★★★"],
-        ["[3] Steurtewagen", "2021", "RF, Logit", "Kernel/TreeSHAP", "Interpretability for sensor-based manufacturing telemetry", "Static historical attribution; no imbalance benchmarking", "★★★★★"],
-        ["[4] Lundberg & Lee", "2017", "General ML", "SHAP Theory", "Foundational game-theoretic additive attribution theory", "Theoretical mathematical framework; lacks domain PdM engineering", "★★★★★"],
-        ["[5] Rajaoarisoa et al.", "2024", "Trees, SVM", "SHAP, Counterfac.", "XAI for maintenance decision systems & alarm filters", "Did not benchmark severe class imbalance or build natural-language rules", "★★★★★"],
-        ["[6] Zonta et al.", "2020", "Survey (100+)", "None", "Systematic review of Industry 4.0 PdM architectures & ROI", "Identified black-box adoption barrier; no empirical XAI implementation", "★★★★☆"],
-        ["[7] Carvalho et al.", "2019", "Survey (ML)", "None", "Comprehensive taxonomy of ML algorithms applied to PdM", "Review only; evaluated no post-hoc explainability or Shapley attributions", "★★★★☆"],
-        ["[8] Dalzochio et al.", "2020", "Rules, Ontol.", "Rule logic", "Machine learning & semantic reasoning challenges in Industry 4.0", "Relied on brittle expert rules; lacks modern gradient tree Shapley XAI", "★★★★☆"],
-        ["[9] Tasci et al.", "2023", "RF, XGB, CatB", "MDI, Permutation", "Remaining useful life and tool wear prediction in manufacturing", "Impurity feature importance exhibits cardinality bias; no local SHAP", "★★★★☆"],
-        ["[10] Lin et al.", "2025", "Cost-XGBoost", "SHAP summary", "Failure time estimation & maintenance resource optimization", "Omitted SMOTE vs cost-weighting comparison & interactive deployment", "★★★★★"],
-        ["[11] Popoola et al.", "2026", "GBDT, Ensembles", "SHAP, LIME", "Interpretable ML framework for fluid & water handling networks", "Fluid domain focus; lacks milling tool wear dynamics & what-if engine", "★★★★☆"],
-        ["[12] Obeten & Jimoh", "2026", "Physics-XGBoost", "TreeSHAP", "Physics-informed cost-aware PdM on AI4I milling sensor data", "Lacks operational Streamlit dashboard, what-if simulator, & unit tests", "★★★★★"],
-        ["This Work", "2026", "XGBoost (Cost)", "TreeSHAP (Dual)", "End-to-end leakage-free explainable PdM framework (X-Maintain)", "Unified solution: leakage purge, utility selection, what-if, UI, 20/20 tests", "★★★★★"]
+        ["Ref.", "Year", "Methodology", "XAI Method", "Core Contributions & Focus", "Limitation / Gap Resolved by X-Maintain"],
+        ["[1]", "2020", "RF, kNN, DT", "TreeSHAP, PDP", "AI4I milling benchmark introduction; initial XAI exploration", "Retained downstream leakage cols (TWF..RNF); inflated accuracy"],
+        ["[2]", "2021", "XGBoost, LGBM", "SHAP, LIME, ICE", "Multi-modal XAI on rotating machines; stability comparison", "Lacks deployment UI, what-if sensitivity simulator, & test suite"],
+        ["[3]", "2021", "RF, Logit", "Kernel/TreeSHAP", "Interpretability for sensor-based manufacturing telemetry", "Static historical attribution; no imbalance benchmarking"],
+        ["[4]", "2017", "General ML", "SHAP Theory", "Foundational game-theoretic additive attribution theory", "Theoretical mathematical framework; lacks domain PdM engineering"],
+        ["[5]", "2024", "Trees, SVM", "SHAP, Counterfac.", "XAI for maintenance decision systems & alarm filters", "Did not benchmark severe class imbalance or build natural-language rules"],
+        ["[6]", "2020", "Survey (100+)", "None", "Systematic review of Industry 4.0 PdM architectures & ROI", "Identified black-box adoption barrier; no empirical XAI implementation"],
+        ["[7]", "2019", "Survey (ML)", "None", "Comprehensive taxonomy of ML algorithms applied to PdM", "Review only; evaluated no post-hoc explainability or Shapley attributions"],
+        ["[8]", "2020", "Rules, Ontol.", "Rule logic", "Machine learning & semantic reasoning challenges in Industry 4.0", "Relied on brittle expert rules; lacks modern gradient tree Shapley XAI"],
+        ["[9]", "2023", "RF, XGB, CatB", "MDI, Permutation", "Remaining useful life and tool wear prediction in manufacturing", "Impurity feature importance exhibits cardinality bias; no local SHAP"],
+        ["[10]", "2025", "Cost-XGBoost", "SHAP summary", "Failure time estimation & maintenance resource optimization", "Omitted SMOTE vs cost-weighting comparison & interactive deployment"],
+        ["[11]", "2026", "GBDT, Ensembles", "SHAP, LIME", "Interpretable ML framework for fluid & water handling networks", "Fluid domain focus; lacks milling tool wear dynamics & what-if engine"],
+        ["[12]", "2026", "Physics-XGBoost", "TreeSHAP", "Physics-informed cost-aware PdM on AI4I milling sensor data", "Lacks operational Streamlit dashboard, what-if simulator, & unit tests"],
+        ["Ours", "2026", "Cost-sens. XGB", "TreeSHAP (Dual)", "End-to-end leakage-free explainable PdM framework (X-Maintain)", "Unified solution: leakage purge, utility selection, what-if, UI, 20/20 tests"]
     ]
-    t1_docx = doc.add_table(rows=len(table1_docx_data), cols=7)
+    t1_docx = doc.add_table(rows=len(table1_docx_data), cols=6)
     for row_idx, row_data in enumerate(table1_docx_data):
         row = t1_docx.rows[row_idx]
         for col_idx, cell_value in enumerate(row_data):
@@ -1417,25 +1436,25 @@ Rajaoarisoa et al. \cite{rajaoarisoa2024} investigated XAI for maintenance decis
 
 \begin{table*}[t]
 \centering
-\caption{Taxonomic Comparison of 12 Benchmark Literature Studies in Predictive Maintenance and Explainable AI}
+\caption{Comparative Analysis of Related Work in Predictive Maintenance and Explainable AI}
 \label{tab:related_work}
-\begin{tabular}{llllllc}
+\begin{tabular}{llllll}
 \toprule
-\textbf{Ref. \& Author} & \textbf{Year} & \textbf{Methodology} & \textbf{XAI Method} & \textbf{Core Contribution} & \textbf{Limitation / Gap Resolved by X-Maintain} & \textbf{Rel.} \\
+\textbf{Ref. \& Author} & \textbf{Year} & \textbf{Methodology} & \textbf{XAI Method} & \textbf{Core Contribution} & \textbf{Limitation / Gap Resolved by X-Maintain} \\
 \midrule
-Matzka \cite{matzka2020} & 2020 & RF, kNN, DT & TreeSHAP, PDP & AI4I milling benchmark introduction & Retained downstream leakage cols (TWF..RNF) & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Gawde et al. \cite{gawde2021} & 2021 & XGBoost, LGBM & SHAP, LIME, ICE & Multi-modal XAI on rotating machines & Lacks deployment UI \& what-if simulator & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Steurtewagen \cite{steurtewagen2021} & 2021 & RF, Logit & TreeSHAP & Interpretability for sensor telemetry & Static attribution; no imbalance benchmarking & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Lundberg \& Lee \cite{lundberg2017} & 2017 & General ML & SHAP Theory & Unified game-theoretic attribution theory & Theoretical framework; no domain PdM pipeline & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Rajaoarisoa et al. \cite{rajaoarisoa2024} & 2024 & Trees, SVM & SHAP, Counterfac. & XAI for maintenance decision systems & No severe imbalance tuning or NL rules & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Zonta et al. \cite{zonta2020} & 2020 & Survey (100+) & None & Systematic Industry 4.0 PdM review & Black-box barrier noted; no XAI framework & $\bigstar\bigstar\bigstar\bigstar\star$ \\
-Carvalho et al. \cite{carvalho2019} & 2019 & Survey (ML) & None & Systematic review of ML in PdM & Review only; evaluated no post-hoc XAI & $\bigstar\bigstar\bigstar\bigstar\star$ \\
-Dalzochio et al. \cite{dalzochio2020} & 2020 & Rules, Ontol. & Rule logic & Reasoning \& ML challenges in PdM & Brittle rules; lacks tree Shapley XAI & $\bigstar\bigstar\bigstar\bigstar\star$ \\
-Taşcı et al. \cite{tasci2023} & 2023 & RF, XGB, CatB & MDI, Permutation & Remaining useful life in manufacturing & Impurity bias; no local SHAP decomposition & $\bigstar\bigstar\bigstar\bigstar\star$ \\
-Lin et al. \cite{lin2025} & 2025 & Cost-XGBoost & SHAP summary & Failure time estimation \& scheduling & No SMOTE vs cost-weighting benchmark & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Popoola et al. \cite{popoola2026} & 2026 & GBDT, Ensembles & SHAP, LIME & Interpretable ML in fluid/water systems & Fluid domain focus; lacks tool wear physics & $\bigstar\bigstar\bigstar\bigstar\star$ \\
-Obeten \& Jimoh \cite{obeten2026} & 2026 & Physics-XGBoost & TreeSHAP & Physics-informed cost-aware PdM on AI4I & Lacks Streamlit dashboard \& test suite & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-\textbf{This Work} & \textbf{2026} & \textbf{XGBoost (Cost)} & \textbf{TreeSHAP} & \textbf{End-to-end explainable PdM framework} & \textbf{Unified verified production pipeline} & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
+Matzka \cite{matzka2020} & 2020 & RF, kNN, DT & TreeSHAP, PDP & AI4I milling benchmark introduction & Retained downstream leakage cols (TWF..RNF) \\
+Gawde et al. \cite{gawde2021} & 2021 & XGBoost, LGBM & SHAP, LIME, ICE & Multi-modal XAI on rotating machines & Lacks deployment UI \& what-if simulator \\
+Steurtewagen \cite{steurtewagen2021} & 2021 & RF, Logit & TreeSHAP & Interpretability for sensor telemetry & Static attribution; no imbalance benchmarking \\
+Lundberg \& Lee \cite{lundberg2017} & 2017 & General ML & SHAP Theory & Unified game-theoretic attribution theory & Theoretical framework; no domain PdM pipeline \\
+Rajaoarisoa et al. \cite{rajaoarisoa2024} & 2024 & Trees, SVM & SHAP, Counterfac. & XAI for maintenance decision systems & No severe imbalance tuning or NL rules \\
+Zonta et al. \cite{zonta2020} & 2020 & Survey (100+) & None & Systematic Industry 4.0 PdM review & Black-box barrier noted; no XAI framework \\
+Carvalho et al. \cite{carvalho2019} & 2019 & Survey (ML) & None & Systematic review of ML in PdM & Review only; evaluated no post-hoc XAI \\
+Dalzochio et al. \cite{dalzochio2020} & 2020 & Rules, Ontol. & Rule logic & Reasoning \& ML challenges in PdM & Brittle rules; lacks tree Shapley XAI \\
+Taşcı et al. \cite{tasci2023} & 2023 & RF, XGB, CatB & MDI, Permutation & Remaining useful life in manufacturing & Impurity bias; no local SHAP decomposition \\
+Lin et al. \cite{lin2025} & 2025 & Cost-XGBoost & SHAP summary & Failure time estimation \& scheduling & No SMOTE vs cost-weighting benchmark \\
+Popoola et al. \cite{popoola2026} & 2026 & GBDT, Ensembles & SHAP, LIME & Interpretable ML in fluid/water systems & Fluid domain focus; lacks tool wear physics \\
+Obeten \& Jimoh \cite{obeten2026} & 2026 & Physics-XGBoost & TreeSHAP & Physics-informed cost-aware PdM on AI4I & Lacks Streamlit dashboard \& test suite \\
+\textbf{This Work} & \textbf{2026} & \textbf{XGBoost (Cost)} & \textbf{TreeSHAP} & \textbf{End-to-end explainable PdM framework} & \textbf{Unified verified production pipeline} \\
 \bottomrule
 \end{tabular}
 \end{table*}

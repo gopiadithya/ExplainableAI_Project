@@ -67,25 +67,25 @@ Rajaoarisoa et al. \cite{rajaoarisoa2024} investigated XAI for maintenance decis
 
 \begin{table*}[t]
 \centering
-\caption{Taxonomic Comparison of 12 Benchmark Literature Studies in Predictive Maintenance and Explainable AI}
+\caption{Comparative Analysis of Related Work in Predictive Maintenance and Explainable AI}
 \label{tab:related_work}
-\begin{tabular}{llllllc}
+\begin{tabular}{llllll}
 \toprule
-\textbf{Ref. \& Author} & \textbf{Year} & \textbf{Methodology} & \textbf{XAI Method} & \textbf{Core Contribution} & \textbf{Limitation / Gap Resolved by X-Maintain} & \textbf{Rel.} \\
+\textbf{Ref. \& Author} & \textbf{Year} & \textbf{Methodology} & \textbf{XAI Method} & \textbf{Core Contribution} & \textbf{Limitation / Gap Resolved by X-Maintain} \\
 \midrule
-Matzka \cite{matzka2020} & 2020 & RF, kNN, DT & TreeSHAP, PDP & AI4I milling benchmark introduction & Retained downstream leakage cols (TWF..RNF) & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Gawde et al. \cite{gawde2021} & 2021 & XGBoost, LGBM & SHAP, LIME, ICE & Multi-modal XAI on rotating machines & Lacks deployment UI \& what-if simulator & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Steurtewagen \cite{steurtewagen2021} & 2021 & RF, Logit & TreeSHAP & Interpretability for sensor telemetry & Static attribution; no imbalance benchmarking & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Lundberg \& Lee \cite{lundberg2017} & 2017 & General ML & SHAP Theory & Unified game-theoretic attribution theory & Theoretical framework; no domain PdM pipeline & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Rajaoarisoa et al. \cite{rajaoarisoa2024} & 2024 & Trees, SVM & SHAP, Counterfac. & XAI for maintenance decision systems & No severe imbalance tuning or NL rules & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Zonta et al. \cite{zonta2020} & 2020 & Survey (100+) & None & Systematic Industry 4.0 PdM review & Black-box barrier noted; no XAI framework & $\bigstar\bigstar\bigstar\bigstar\star$ \\
-Carvalho et al. \cite{carvalho2019} & 2019 & Survey (ML) & None & Systematic review of ML in PdM & Review only; evaluated no post-hoc XAI & $\bigstar\bigstar\bigstar\bigstar\star$ \\
-Dalzochio et al. \cite{dalzochio2020} & 2020 & Rules, Ontol. & Rule logic & Reasoning \& ML challenges in PdM & Brittle rules; lacks tree Shapley XAI & $\bigstar\bigstar\bigstar\bigstar\star$ \\
-Taşcı et al. \cite{tasci2023} & 2023 & RF, XGB, CatB & MDI, Permutation & Remaining useful life in manufacturing & Impurity bias; no local SHAP decomposition & $\bigstar\bigstar\bigstar\bigstar\star$ \\
-Lin et al. \cite{lin2025} & 2025 & Cost-XGBoost & SHAP summary & Failure time estimation \& scheduling & No SMOTE vs cost-weighting benchmark & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-Popoola et al. \cite{popoola2026} & 2026 & GBDT, Ensembles & SHAP, LIME & Interpretable ML in fluid/water systems & Fluid domain focus; lacks tool wear physics & $\bigstar\bigstar\bigstar\bigstar\star$ \\
-Obeten \& Jimoh \cite{obeten2026} & 2026 & Physics-XGBoost & TreeSHAP & Physics-informed cost-aware PdM on AI4I & Lacks Streamlit dashboard \& test suite & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
-\textbf{This Work} & \textbf{2026} & \textbf{XGBoost (Cost)} & \textbf{TreeSHAP} & \textbf{End-to-end explainable PdM framework} & \textbf{Unified verified production pipeline} & $\bigstar\bigstar\bigstar\bigstar\bigstar$ \\
+Matzka \cite{matzka2020} & 2020 & RF, kNN, DT & TreeSHAP, PDP & AI4I milling benchmark introduction & Retained downstream leakage cols (TWF..RNF) \\
+Gawde et al. \cite{gawde2021} & 2021 & XGBoost, LGBM & SHAP, LIME, ICE & Multi-modal XAI on rotating machines & Lacks deployment UI \& what-if simulator \\
+Steurtewagen \cite{steurtewagen2021} & 2021 & RF, Logit & TreeSHAP & Interpretability for sensor telemetry & Static attribution; no imbalance benchmarking \\
+Lundberg \& Lee \cite{lundberg2017} & 2017 & General ML & SHAP Theory & Unified game-theoretic attribution theory & Theoretical framework; no domain PdM pipeline \\
+Rajaoarisoa et al. \cite{rajaoarisoa2024} & 2024 & Trees, SVM & SHAP, Counterfac. & XAI for maintenance decision systems & No severe imbalance tuning or NL rules \\
+Zonta et al. \cite{zonta2020} & 2020 & Survey (100+) & None & Systematic Industry 4.0 PdM review & Black-box barrier noted; no XAI framework \\
+Carvalho et al. \cite{carvalho2019} & 2019 & Survey (ML) & None & Systematic review of ML in PdM & Review only; evaluated no post-hoc XAI \\
+Dalzochio et al. \cite{dalzochio2020} & 2020 & Rules, Ontol. & Rule logic & Reasoning \& ML challenges in PdM & Brittle rules; lacks tree Shapley XAI \\
+Taşcı et al. \cite{tasci2023} & 2023 & RF, XGB, CatB & MDI, Permutation & Remaining useful life in manufacturing & Impurity bias; no local SHAP decomposition \\
+Lin et al. \cite{lin2025} & 2025 & Cost-XGBoost & SHAP summary & Failure time estimation \& scheduling & No SMOTE vs cost-weighting benchmark \\
+Popoola et al. \cite{popoola2026} & 2026 & GBDT, Ensembles & SHAP, LIME & Interpretable ML in fluid/water systems & Fluid domain focus; lacks tool wear physics \\
+Obeten \& Jimoh \cite{obeten2026} & 2026 & Physics-XGBoost & TreeSHAP & Physics-informed cost-aware PdM on AI4I & Lacks Streamlit dashboard \& test suite \\
+\textbf{This Work} & \textbf{2026} & \textbf{XGBoost (Cost)} & \textbf{TreeSHAP} & \textbf{End-to-end explainable PdM framework} & \textbf{Unified verified production pipeline} \\
 \bottomrule
 \end{tabular}
 \end{table*}
