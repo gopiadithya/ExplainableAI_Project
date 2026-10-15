@@ -32,3 +32,4 @@ desktop.ini
 # Temporary files
 *.tmp
 page_*.png
+~$*
